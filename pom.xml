@@ -1,0 +1,78 @@
+<build>
+  <plugins>
+    <!-- JARを依存込みで作成 -->
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-assembly-plugin</artifactId>
+      <version>3.3.0</version>
+      <configuration>
+        <archive>
+          <manifest>
+            <mainClass>com.example.Main</mainClass>
+          </manifest>
+        </archive>
+        <descriptorRefs>
+          <descriptorRef>jar-with-dependencies</descriptorRef>
+        </descriptorRefs>
+      </configuration>
+      <executions>
+        <execution>
+          <id>make-assembly</id>
+          <phase>package</phase>
+          <goals>
+            <goal>single</goal>
+          </goals>
+        </execution>
+      </executions>
+    </plugin>
+
+    <!-- JREをコピー -->
+    <plugin>
+      <artifactId>maven-resources-plugin</artifactId>
+      <version>3.2.0</version>
+      <executions>
+        <execution>
+          <id>copy-jre</id>
+          <phase>prepare-package</phase>
+          <goals>
+            <goal>copy-resources</goal>
+          </goals>
+          <configuration>
+            <outputDirectory>${project.build.directory}/jre</outputDirectory>
+            <resources>
+              <resource>
+                <directory>${project.basedir}/jre</directory> <!-- 事前にJREを配置 -->
+              </resource>
+            </resources>
+          </configuration>
+        </execution>
+      </executions>
+    </plugin>
+
+    <!-- Launch4jでEXE化 -->
+    <plugin>
+      <groupId>com.akathist.maven.plugins.launch4j</groupId>
+      <artifactId>launch4j-maven-plugin</artifactId>
+      <version>2.1.2</version>
+      <executions>
+        <execution>
+          <id>l4j-clui</id>
+          <phase>package</phase>
+          <goals>
+            <goal>launch4j</goal>
+          </goals>
+          <configuration>
+            <headerType>console</headerType>
+            <jar>${project.build.directory}/${project.artifactId}-${project.version}-jar-with-dependencies.jar</jar>
+            <outfile>${project.build.directory}/${project.artifactId}.exe</outfile>
+            <jre>
+              <bundledJrePath>jre</bundledJrePath> <!-- コピーされたJREを指定 -->
+              <minVersion>1.8.0</minVersion>
+              <maxVersion>1.8.999</maxVersion>
+            </jre>
+          </configuration>
+        </execution>
+      </executions>
+    </plugin>
+  </plugins>
+</build>
